@@ -99,8 +99,12 @@
       flex: 1; padding: 8px; border-radius: 8px;
       font-size: 11px; text-align: center; line-height: 1.5;
     }
-    .legend-dr { background: #1b2d1b; color: #6bff8a; border: 1px solid #203d20; }
-    .legend-cr { background: #2d1b1b; color: #ff9a9a; border: 1px solid #3d2020; }
+    .legend-dr {
+      background: #1b2d1b; color: #6bff8a; border: 1px solid #203d20;
+    }
+    .legend-cr {
+      background: #2d1b1b; color: #ff9a9a; border: 1px solid #3d2020;
+    }
   </style>
 </head>
 <body>
@@ -188,9 +192,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXAM9m5FjyodVvGpOhlPCd406-lW114D4VNbJFviu2M8uUqI_8NsEIUMFMkUen3EK2Eg/exec';
+  // 最新的 Apps Script Web App URL
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPkKdSSoLf87DFyjwO-tsmDX181Nz0AzQHKHbbVn6NFHO-GjOYByZ1tVnLxwKzurKATw/exec';
 
-  let selectedType = 'cr'; // default Cr. (expenses)
+  let selectedType = 'cr'; // 預設 Cr. 支出（增加欠款）
   let items = JSON.parse(localStorage.getItem('accountItems') || 'null') || [
     '泊車', '隧道', '五金', '支票', 'FPS', 'CALL車', '現金',
     '入油', '告票', '交租', '停車場', '交停車場', '銀行',
@@ -198,18 +203,19 @@
     '保險', '牌費', '交稅', '糧', '家用', '其他'
   ];
 
-  // Auto-set today
+  // 設置今天日期
   const today = new Date();
   document.getElementById('date').value = today.toISOString().split('T')[0];
 
-  // Auto-set current month/year
+  // 設置當前月份/年份
   const monthNames = ['1月','2月','3月','4月','5月','6月',
-                       '7月','8月','9月','10月','11月','12月'];
+                      '7月','8月','9月','10月','11月','12月'];
   document.getElementById('monthSel').value = monthNames[today.getMonth()];
   document.getElementById('yearSel').value = today.getFullYear().toString();
 
   function getSheetName() {
-    return document.getElementById('monthSel').value + document.getElementById('yearSel').value;
+    return document.getElementById('monthSel').value +
+           document.getElementById('yearSel').value; // 例如：3月2026
   }
 
   function renderItems() {
@@ -229,7 +235,7 @@
     const input = document.getElementById('newItemInput');
     const val = input.value.trim();
     if (val && !items.includes(val)) {
-      items.splice(items.length - 1, 0, val);
+      items.splice(items.length - 1, 0, val); // 插入「其他」前
       localStorage.setItem('accountItems', JSON.stringify(items));
       renderItems();
       document.getElementById('item').value = val;
@@ -245,7 +251,7 @@
     document.getElementById('drBtn').classList.toggle('active', type === 'dr');
     document.getElementById('crBtn').classList.toggle('active', type === 'cr');
   }
-  setType('cr'); // default to Cr. expenses
+  setType('cr'); // 預設 Cr. 支出
 
   function showToast(msg, isError = false) {
     const t = document.getElementById('toast');
@@ -271,8 +277,8 @@
       date: date,
       item: item,
       remarks: remarks,
-      dr: selectedType === 'dr' ? amount : 0,
-      cr: selectedType === 'cr' ? amount : 0,
+      dr: selectedType === 'dr' ? amount : 0, // Dr. 收款（減少欠款）
+      cr: selectedType === 'cr' ? amount : 0, // Cr. 支出（增加欠款）
       sheetName: sheetName
     };
 
@@ -287,11 +293,14 @@
       });
       const result = await res.json();
       if (result.success) {
-        const total = result.newTotal.toLocaleString('zh-HK', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+        const total = result.newTotal.toLocaleString('zh-HK', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        });
         showToast('✅ 已記錄！目前總額: $' + total);
         document.getElementById('amount').value = '';
         document.getElementById('remarks').value = '';
-        setType('cr');
+        setType('cr'); // 記一筆後回到支出
       } else {
         showToast('❌ 錯誤：' + result.error, true);
       }
