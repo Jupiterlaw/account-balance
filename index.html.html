@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>帳目記錄</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'PingFang HK', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 6px;
+      color: #a8d8ea;
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 11px;
+      color: #556;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .field { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 11px;
+      color: #a8d8ea;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    input, select {
+      width: 100%;
+      background: #0f3460;
+      border: 1px solid #1a4a80;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      padding: 12px 14px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus { border-color: #a8d8ea; }
+    .row { display: flex; gap: 10px; }
+    .row .field { flex: 1; }
+    .type-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .type-btn {
+      flex: 1; padding: 14px; border-radius: 10px;
+      border: 2px solid transparent;
+      font-size: 14px; font-weight: bold; cursor: pointer;
+      transition: all 0.2s; line-height: 1.3; text-align: center;
+    }
+    .type-btn.dr { background: #1b2d1b; color: #6bff8a; border-color: #203d20; }
+    .type-btn.cr { background: #2d1b1b; color: #ff6b6b; border-color: #3d2020; }
+    .type-btn.active.dr { background: #6bff8a; color: #1a1a2e; border-color: #6bff8a; }
+    .type-btn.active.cr { background: #ff6b6b; color: #fff; border-color: #ff6b6b; }
+    .submit-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #a8d8ea, #6bafcc);
+      color: #1a1a2e; font-size: 17px; font-weight: bold;
+      border: none; border-radius: 12px; cursor: pointer;
+      margin-top: 8px; letter-spacing: 2px;
+    }
+    .submit-btn:disabled { opacity: 0.6; }
+    .toast {
+      display: none; position: fixed;
+      bottom: 30px; left: 50%; transform: translateX(-50%);
+      padding: 12px 24px; border-radius: 30px;
+      font-weight: bold; font-size: 14px;
+      z-index: 999; white-space: nowrap;
+      background: #6bff8a; color: #1a1a2e;
+    }
+    .toast.error { background: #ff6b6b; color: #fff; }
+    .add-item-row { display: flex; gap: 8px; margin-top: 8px; }
+    .add-item-row input { flex: 1; }
+    .add-btn {
+      padding: 12px 16px; background: #0f3460;
+      border: 1px solid #a8d8ea; border-radius: 10px;
+      color: #a8d8ea; font-size: 22px; cursor: pointer; flex-shrink: 0;
+    }
+    select option { background: #0f3460; }
+    .legend {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .legend-item {
+      flex: 1; padding: 8px; border-radius: 8px;
+      font-size: 11px; text-align: center; line-height: 1.5;
+    }
+    .legend-dr { background: #1b2d1b; color: #6bff8a; border: 1px solid #203d20; }
+    .legend-cr { background: #2d1b1b; color: #ff9a9a; border: 1px solid #3d2020; }
+  </style>
+</head>
+<body>
+
+<h1>📒 帳目記錄</h1>
+<div class="subtitle">Jupiter's Design Limited</div>
+
+<div class="card">
+
+  <!-- 說明 -->
+  <div class="legend">
+    <div class="legend-item legend-dr">
+      <div style="font-size:15px;font-weight:bold">Dr. 收款</div>
+      <div>對方還款<br>↓ 減少欠款</div>
+    </div>
+    <div class="legend-item legend-cr">
+      <div style="font-size:15px;font-weight:bold">Cr. 支出</div>
+      <div>代付費用<br>↑ 增加欠款</div>
+    </div>
+  </div>
+
+  <!-- 年月選擇 -->
+  <div class="row">
+    <div class="field">
+      <label>月份</label>
+      <select id="monthSel">
+        <option>1月</option><option>2月</option><option>3月</option>
+        <option>4月</option><option>5月</option><option>6月</option>
+        <option>7月</option><option>8月</option><option>9月</option>
+        <option>10月</option><option>11月</option><option>12月</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>年份</label>
+      <select id="yearSel">
+        <option>2025</option><option>2026</option><option>2027</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 日期 -->
+  <div class="field">
+    <label>日期</label>
+    <input type="date" id="date">
+  </div>
+
+  <!-- 類型 -->
+  <div style="margin-bottom:8px">
+    <label>類型</label>
+    <div class="type-toggle">
+      <button class="type-btn dr" id="drBtn" onclick="setType('dr')">
+        Dr. 收款<br><span style="font-size:11px;font-weight:normal">對方還款</span>
+      </button>
+      <button class="type-btn cr" id="crBtn" onclick="setType('cr')">
+        Cr. 支出<br><span style="font-size:11px;font-weight:normal">代付費用</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 金額 -->
+  <div class="field">
+    <label>金額 (HKD)</label>
+    <input type="number" id="amount" placeholder="0.00" step="0.01" inputmode="decimal">
+  </div>
+
+  <!-- 項目 -->
+  <div class="field">
+    <label>項目</label>
+    <select id="item"></select>
+    <div class="add-item-row">
+      <input type="text" id="newItemInput" placeholder="輸入新項目名稱...">
+      <button class="add-btn" onclick="addNewItem()">＋</button>
+    </div>
+  </div>
+
+  <!-- 備注 -->
+  <div class="field">
+    <label>備注（可選）</label>
+    <input type="text" id="remarks" placeholder="如：師公、螺絲、1500x19日...">
+  </div>
+
+  <button class="submit-btn" onclick="submitEntry()">提 交 記 錄</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXAM9m5FjyodVvGpOhlPCd406-lW114D4VNbJFviu2M8uUqI_8NsEIUMFMkUen3EK2Eg/exec';
+
+  let selectedType = 'cr'; // default Cr. (expenses)
+  let items = JSON.parse(localStorage.getItem('accountItems') || 'null') || [
+    '泊車', '隧道', '五金', '支票', 'FPS', 'CALL車', '現金',
+    '入油', '告票', '交租', '停車場', '交停車場', '銀行',
+    '會計', '工具', '鋁通', '車套', 'Super Charge', '換胎',
+    '保險', '牌費', '交稅', '糧', '家用', '其他'
+  ];
+
+  // Auto-set today
+  const today = new Date();
+  document.getElementById('date').value = today.toISOString().split('T')[0];
+
+  // Auto-set current month/year
+  const monthNames = ['1月','2月','3月','4月','5月','6月',
+                       '7月','8月','9月','10月','11月','12月'];
+  document.getElementById('monthSel').value = monthNames[today.getMonth()];
+  document.getElementById('yearSel').value = today.getFullYear().toString();
+
+  function getSheetName() {
+    return document.getElementById('monthSel').value + document.getElementById('yearSel').value;
+  }
+
+  function renderItems() {
+    const sel = document.getElementById('item');
+    const cur = sel.value;
+    sel.innerHTML = '';
+    items.forEach(i => {
+      const o = document.createElement('option');
+      o.value = i; o.text = i;
+      if (i === cur) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+  renderItems();
+
+  function addNewItem() {
+    const input = document.getElementById('newItemInput');
+    const val = input.value.trim();
+    if (val && !items.includes(val)) {
+      items.splice(items.length - 1, 0, val);
+      localStorage.setItem('accountItems', JSON.stringify(items));
+      renderItems();
+      document.getElementById('item').value = val;
+      input.value = '';
+      showToast('✅ 已加入：' + val);
+    } else if (items.includes(val)) {
+      showToast('⚠️ 項目已存在', true);
+    }
+  }
+
+  function setType(type) {
+    selectedType = type;
+    document.getElementById('drBtn').classList.toggle('active', type === 'dr');
+    document.getElementById('crBtn').classList.toggle('active', type === 'cr');
+  }
+  setType('cr'); // default to Cr. expenses
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isError ? ' error' : '');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+  }
+
+  async function submitEntry() {
+    const date = document.getElementById('date').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const item = document.getElementById('item').value;
+    const remarks = document.getElementById('remarks').value;
+    const sheetName = getSheetName();
+
+    if (!date || !amount || amount <= 0) {
+      showToast('⚠️ 請填寫日期和金額', true);
+      return;
+    }
+
+    const payload = {
+      date: date,
+      item: item,
+      remarks: remarks,
+      dr: selectedType === 'dr' ? amount : 0,
+      cr: selectedType === 'cr' ? amount : 0,
+      sheetName: sheetName
+    };
+
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = '提交中...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.success) {
+        const total = result.newTotal.toLocaleString('zh-HK', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+        showToast('✅ 已記錄！目前總額: $' + total);
+        document.getElementById('amount').value = '';
+        document.getElementById('remarks').value = '';
+        setType('cr');
+      } else {
+        showToast('❌ 錯誤：' + result.error, true);
+      }
+    } catch (err) {
+      showToast('❌ 連線失敗', true);
+    }
+
+    btn.textContent = '提 交 記 錄';
+    btn.disabled = false;
+  }
+</script>
+</body>
+</html>
